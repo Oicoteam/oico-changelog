@@ -1,13 +1,13 @@
 module Oico
   class Changelog
     class Entry
-      def initialize(type:, body: last_commit_title, ref_type: nil, ref_id: nil, user: github_user)
-        id, body = extract_id(body)
+      def initialize(type:, body: last_commit, ref_type: nil, ref_id: nil, user: github_user)
+        id, message = extract_id_and_message(body.lines)
 
         @type     = type
-        @body     = body
-        @ref_type = id ? :issues : :pull
-        @ref_id   = id || 'x'
+        @message  = message
+        @ref_type = ref_type || (id ? :pull : :issues)
+        @ref_id   = ref_id || id || 'NOT_FOUND'
         @user     = user
       end
 
@@ -20,22 +20,27 @@ module Oico
       end
 
       def content
-        period = '.' unless body.end_with?('.')
+        period = '.' unless message.end_with?('.')
 
-        "* #{ref}: #{body}#{period} ([@#{user}][])\n"
+        "* #{ref}: #{message}#{period} ([@#{user}][])\n"
       end
 
       private
 
-      attr_accessor :body
-      attr_reader   :type, :ref_type, :ref_id, :user
+      attr_accessor :message
+      attr_reader   :type, :ref_type, :ref_id, :user, :commit_title, :commit_message
 
-      def extract_id(body)
-        /^\[Fix(?:es)? #(\d+)\] (.*)/.match(body)&.captures || [nil, body]
+      def extract_id_and_message(body)
+        extract_commit_message(body)
+
+        id, message = /(?:.*)?#(\d+).?(.*)/.match(commit_title)&.captures || [nil, commit_title]
+        message     = commit_message unless commit_message.empty?
+
+        [id, message]
       end
 
       def path
-        format(Changelog::ENTRIES_PATH_TEMPLATE, type: type, name: str_to_filename(body))
+        format(Changelog::ENTRIES_PATH_TEMPLATE, type: type, name: str_to_filename(commit_title))
       end
 
       def str_to_filename(str)
@@ -66,8 +71,13 @@ module Oico
         "[##{ref_id}](#{Changelog::REF_URL}/#{ref_type}/#{ref_id})"
       end
 
-      def last_commit_title
-        `git log -1 --pretty=%B`.lines.first.chomp
+      def last_commit
+        `git log -1 --pretty=%B`
+      end
+
+      def extract_commit_message(body)
+        @commit_title   = body.first.chomp
+        @commit_message = body.last.chomp
       end
     end
   end
