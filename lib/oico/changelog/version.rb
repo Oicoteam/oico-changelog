@@ -1,5 +1,5 @@
 module Oico
-  module Changelog
+  class Changelog
     VERSION = "0.1.0"
   end
 end
