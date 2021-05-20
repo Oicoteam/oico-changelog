@@ -10,14 +10,12 @@ module Oico
 
     class Error < StandardError; end
 
-    attr_reader :header, :rest
-
     def initialize(content: File.read(Changelog::PATH), entries: Changelog.read_entries)
       ss          = StringScanner.new(content)
 
       @header     = ss.scan_until(Changelog::FIRST_HEADER)
       @unreleased = parse_release(ss.scan_until(/\n(?=## )/m))
-      @rest       = ss.rest
+      @rest       = ss.rest.chomp
       @entries    = entries
     end
 
@@ -28,9 +26,12 @@ module Oico
     end
 
     def merge_content
-      merged_content = [@header, unreleased_content, @rest.chomp, *new_contributor_lines].join("\n")
+      merged_content = [header, unreleased_content]
 
-      merged_content << EOF
+      merged_content << rest unless rest.empty?
+      merged_content << EOF unless merged_content[-1]&.end_with?("\n")
+
+      merged_content.join("\n")
     end
 
     def delete_entries!
@@ -39,27 +40,16 @@ module Oico
 
     private
 
-    attr_reader :entries
+    attr_reader :header, :unreleased, :rest, :entries
 
     def parse_release(unreleased_entries)
+      return {} unless unreleased_entries
+
       unreleased_entries.lines
                         .map(&:chomp)
                         .reject(&:empty?)
                         .slice_before(Changelog::HEADER)
                         .to_h { |header, *entries| [Changelog::HEADER.match(header)[1], entries] }
-    end
-
-    def new_contributor_lines
-      contributors.map { |user| format(Changelog::CONTRIBUTOR, user: user) }
-                  .reject { |line| @rest.include?(line) }
-    end
-
-    def contributors
-      contributors = entries.values.flat_map do |entry|
-        entry.match(/\. \((?<contributors>.+)\)\n/)[:contributors].split(',')
-      end
-
-      contributors.join.scan(Changelog::SIGNATURE).flatten
     end
 
     def unreleased_content
@@ -82,7 +72,7 @@ module Oico
     end
 
     def merge_entries(entry_map)
-      all       = @unreleased.merge(entry_map) { |_k, v1, v2| v1.concat(v2) }
+      all       = unreleased.merge(entry_map) { |_k, v1, v2| v1.concat(v2) }
       canonical = Changelog::TYPE_TO_HEADER.values.to_h { |v| [v, nil] }
 
       canonical.merge(all).compact

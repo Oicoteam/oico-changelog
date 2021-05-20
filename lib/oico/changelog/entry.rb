@@ -20,7 +20,7 @@ module Oico
       end
 
       def content
-        period = '.' unless body.end_with? '.'
+        period = '.' unless body.end_with?('.')
 
         "* #{ref}: #{body}#{period} ([@#{user}][])\n"
       end
