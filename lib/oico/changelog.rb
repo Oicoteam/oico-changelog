@@ -10,11 +10,11 @@ module Oico
     class Error < StandardError; end
 
     def initialize(content: File.read(Changelog::PATH), entries: Changelog.read_entries)
-      ss          = StringScanner.new(content)
+      string      = StringScanner.new(content)
 
-      @header     = ss.scan_until(Changelog::FIRST_HEADER)
-      @unreleased = parse_release(ss.scan_until(/\n(?=## )/m))
-      @rest       = ss.rest.chomp
+      @header     = string.scan_until(Changelog::FIRST_HEADER)
+      @unreleased = parse_release(string.scan_until(/\n(?=## )/m))
+      @rest       = string.rest.chomp
       @entries    = entries
     end
 
@@ -28,9 +28,9 @@ module Oico
       merged_content = [header, unreleased_content]
 
       merged_content << rest unless rest.empty?
-      merged_content << EOF unless merged_content[-1]&.end_with?("\n")
+      merged_content << EOF  unless merged_content[-1]&.end_with?("\n")
 
-      merged_content.join("\n")
+      merged_content.join("\n").gsub(/[\n]{2,}/, "\n\n")
     end
 
     def delete_entries!
@@ -72,9 +72,9 @@ module Oico
 
     def merge_entries(entry_map)
       all       = unreleased.merge(entry_map) { |_k, v1, v2| v1.concat(v2) }
-      canonical = Changelog::TYPE_TO_HEADER.values.to_h { |v| [v, nil] }
+      distinct  = Changelog::TYPE_TO_HEADER.values.to_h { |v| [v, nil] }
 
-      canonical.merge(all).compact
+      distinct.merge(all).compact
     end
 
     class << self

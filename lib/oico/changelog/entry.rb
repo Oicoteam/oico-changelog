@@ -43,18 +43,18 @@ module Oico
         format(Changelog::ENTRIES_PATH_TEMPLATE, type: type, name: str_to_filename(commit_title))
       end
 
-      def str_to_filename(str)
-        str.downcase
-           .split
-           .each { |s| s.gsub!(/\W/, '') }
-           .reject(&:empty?)
-           .inject do |result, word|
-             s = "#{result}_#{word}"
+      def str_to_filename(string)
+        string.downcase
+              .split
+              .each { |s| s.gsub!(/\W/, '') }
+              .reject(&:empty?)
+              .inject do |result, word|
+                concatenated_string = "#{result}_#{word}"
 
-             return result if s.length > Changelog::MAX_LENGTH
+                 return result if concatenated_string.length > Changelog::MAX_LENGTH
 
-             s
-           end
+                 concatenated_string
+              end
       end
 
       def github_user
