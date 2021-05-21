@@ -4,12 +4,11 @@ require_relative 'changelog/version'
 require_relative 'changelog/constants'
 require_relative 'changelog/entry'
 require_relative 'changelog/release'
-require 'byebug'
 
 module Oico
   class Changelog
     include Oico::Changelog::Constants
-    include Oico::Changelog::Release
+    extend Oico::Changelog::Release
 
     class Error < StandardError; end
 
@@ -34,7 +33,7 @@ module Oico
     end
 
     def add_release!
-      release_title = "## #{Changelog::Release.last_release} (#{current_date})"
+      release_title = "## #{Changelog.last_release} (#{current_date})"
       content       = file_content.insert(1, release_title)
                                   .join("\n")
 
