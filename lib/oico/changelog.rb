@@ -3,35 +3,42 @@ require 'strscan'
 require_relative 'changelog/version'
 require_relative 'changelog/constants'
 require_relative 'changelog/entry'
+require_relative 'changelog/release'
+require 'byebug'
 
 module Oico
   class Changelog
     include Oico::Changelog::Constants
+    include Oico::Changelog::Release
 
     class Error < StandardError; end
 
     def initialize(content: File.read(Changelog::PATH), entries: Changelog.read_entries)
-      string      = StringScanner.new(content)
+      string        = StringScanner.new(content)
 
-      @header     = string.scan_until(Changelog::FIRST_HEADER)
-      @unreleased = parse_release(string.scan_until(/\n(?=## )/m))
-      @rest       = string.rest.chomp
-      @entries    = entries
+      @header       = string.scan_until(Changelog::FIRST_HEADER)
+      @unreleased   = parse_release(string.scan_until(/\n(?=## )/m))
+      @rest         = string.rest.chomp
+      @entries      = entries
+      @file_content = [header, unreleased_content]
     end
 
     def merge!
-      File.write(Changelog::PATH, merge_content)
+      file_content << rest unless rest.empty?
+      file_content << EOF  unless file_content[-1]&.end_with?("\n")
 
-      self
+      content = file_content.join("\n")
+                            .gsub(/[\n]{2,}/, "\n\n")
+
+      write_file(content)
     end
 
-    def merge_content
-      merged_content = [header, unreleased_content]
+    def add_release!
+      release_title = "## #{Changelog::Release.last_release} (#{current_date})"
+      content       = file_content.insert(1, release_title)
+                                  .join("\n")
 
-      merged_content << rest unless rest.empty?
-      merged_content << EOF  unless merged_content[-1]&.end_with?("\n")
-
-      merged_content.join("\n").gsub(/[\n]{2,}/, "\n\n")
+      write_file(content)
     end
 
     def delete_entries!
@@ -40,7 +47,13 @@ module Oico
 
     private
 
-    attr_reader :header, :unreleased, :rest, :entries
+    attr_reader :header, :unreleased, :rest, :entries, :file_content
+
+    def write_file(content)
+      File.write(Changelog::PATH, content)
+
+      self
+    end
 
     def parse_release(unreleased_entries)
       return {} unless unreleased_entries
@@ -76,6 +89,10 @@ module Oico
       distinct  = Changelog::TYPE_TO_HEADER.values.to_h { |v| [v, nil] }
 
       distinct.merge(all).compact
+    end
+
+    def current_date
+      Time.now.strftime("%d-%m-%Y")
     end
 
     class << self

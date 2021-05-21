@@ -1,7 +1,7 @@
 module Oico
   class Changelog
     class Entry
-      def initialize(type:, body: last_commit, ref_type: nil, ref_id: nil, user: github_user)
+      def initialize(type:, body: last_commit, ref_type: nil, ref_id: nil, user: last_commit_user)
         id, message = extract_id_and_message(body.lines)
 
         @type     = type
@@ -22,7 +22,7 @@ module Oico
       def content
         period = '.' unless message.end_with?('.')
 
-        "* #{ref}: #{message}#{period} ([@#{user}][])\n"
+        "* #{ref}: #{message}#{period} #{user.include?(" ") ? "([#{user}])" : "([@#{user}])"}\n"
       end
 
       private
@@ -57,18 +57,12 @@ module Oico
               end
       end
 
-      def github_user
-        user = `git config --global credential.username`.chomp
-
-        if user.empty?
-          warn 'Set your username with `git config --global credential.username "myusernamehere"`'
-        end
-
-        user
-      end
-
       def ref
         "[##{ref_id}](#{Changelog::REF_URL}/#{ref_type}/#{ref_id})"
+      end
+
+      def last_commit_user
+        `git log -1 --pretty=format:'%an'`
       end
 
       def last_commit
