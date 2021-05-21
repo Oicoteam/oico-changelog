@@ -1,7 +1,7 @@
 name: Merge to main branch
 
 on:
-  merge:
+  push:
     branches:
       - main
 
