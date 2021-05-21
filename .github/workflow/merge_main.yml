@@ -1,0 +1,12 @@
+name: Merge to main branch
+
+on:
+  merge:
+    branches:
+      - main
+
+jobs:
+  merge_main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2

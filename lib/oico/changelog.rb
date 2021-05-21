@@ -1,3 +1,4 @@
+require 'dotenv/load'
 require 'strscan'
 require_relative 'changelog/version'
 require_relative 'changelog/constants'
