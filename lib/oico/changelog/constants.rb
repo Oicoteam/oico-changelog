@@ -5,8 +5,9 @@ module Oico::Changelog::Constants
   FIRST_HEADER = /#{Regexp.escape("## production (unreleased)\n")}/m.freeze
   ENTRIES_PATH_TEMPLATE = "#{ENTRIES_PATH}%<type>s_%<name>s.md"
   TYPE_REGEXP = /#{Regexp.escape(ENTRIES_PATH)}([a-z]+)_/.freeze
-  TYPE_TO_HEADER = { new: 'New features', fix: 'Bug fixes', change: 'Changes' }.freeze
+  TYPE_TO_HEADER = { change: 'Changes', feature: 'New features', fix: 'Bug fixes' }.freeze
   HEADER = /### (.*)/.freeze
+  MESSAGE_REGEX = /(?:.*)#(\d+)[^\/]+\/(.*?)\/.+/.freeze
   PATH = 'CHANGELOG.md'
   REF_URL = ENV["REF_URL"]
   MAX_LENGTH = 40

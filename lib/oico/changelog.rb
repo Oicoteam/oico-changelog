@@ -40,10 +40,6 @@ module Oico
       write_file(content)
     end
 
-    def delete_entries!
-      entries.each_key { |path| File.delete(path) }
-    end
-
     private
 
     attr_reader :header, :unreleased, :rest, :entries, :file_content
@@ -84,8 +80,8 @@ module Oico
     end
 
     def merge_entries(entry_map)
-      all       = unreleased.merge(entry_map) { |_k, v1, v2| v1.concat(v2) }
-      distinct  = Changelog::TYPE_TO_HEADER.values.to_h { |v| [v, nil] }
+      all      = unreleased.merge(entry_map) { |_k, v1, v2| v1.concat(v2) }
+      distinct = Changelog::TYPE_TO_HEADER.values.to_h { |v| [v, nil] }
 
       distinct.merge(all).compact
     end
@@ -101,6 +97,12 @@ module Oico
 
       def read_entries
         entry_paths.to_h { |path| [path, File.read(path)] }
+      end
+
+      def delete_entries!
+        entries = Changelog.read_entries
+
+        entries.each_key { |path| File.delete(path) }
       end
 
       def entry_paths
