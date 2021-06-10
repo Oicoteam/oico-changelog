@@ -1,40 +1,47 @@
-module Oico::Changelog::Release
-  FEATURE_REGEX = /changelog\/feature/.freeze
-  CHANGE_REGEX  = /changelog\/change/.freeze
+module Oico
+  class Changelog
+    class Release
+      FEATURE_REGEX = /changelog\/feature/.freeze
+      CHANGE_REGEX  = /changelog\/change/.freeze
 
-  class << self
-    def major
-      `./bin/update_tags -M`
-    end
+      class << self
+        def major
+          `./bin/update_tags -M`
+        end
 
-    def minor
-      `./bin/update_tags -m`
-    end
+        def minor
+          `./bin/update_tags -m`
+        end
 
-    def patch
-      `./bin/update_tags -p`
-    end
+        def patch
+          `./bin/update_tags -p`
+        end
 
-    def last_release
-      `git fetch --all --tags`
-      `git tag`.chomp
-    end
+        def last_release
+          `git fetch --all --tags`
+          `git tag`.chomp
+        end
 
-    def auto_detect
-      entry_keys   = Oico::Changelog.read_entries.keys
-      release_type = :patch
+        def auto_detect
+          changelog  = Changelog.new
+          unreleased = changelog.unreleased
 
-      entry_keys.each do |key|
-        release_type = :minor if key.match?(FEATURE_REGEX)
+          return if unreleased.empty?
 
-        if key.match?(CHANGE_REGEX)
-          release_type = :major
+          release_type = :patch
 
-          break
+          if unreleased[Changelog::TYPE_TO_HEADER[:change]]&.any?
+            release_type = :major
+          elsif unreleased[Changelog::TYPE_TO_HEADER[:feature]]&.any?
+            release_type = :minor
+          end
+
+          # changelog.add_release!
+
+          # public_send(release_type)
+          release_type
         end
       end
-
-      public_send(release_type)
     end
   end
 end

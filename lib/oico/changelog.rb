@@ -8,9 +8,10 @@ require_relative 'changelog/release'
 module Oico
   class Changelog
     include Oico::Changelog::Constants
-    extend Oico::Changelog::Release
 
     class Error < StandardError; end
+
+    attr_reader :unreleased
 
     def initialize(content: File.read(Changelog::PATH), entries: Changelog.read_entries)
       string        = StringScanner.new(content)
@@ -23,6 +24,8 @@ module Oico
     end
 
     def merge!
+      yield if block_given?
+
       file_content << rest unless rest.empty?
       file_content << EOF  unless file_content[-1]&.end_with?("\n")
 
@@ -33,16 +36,16 @@ module Oico
     end
 
     def add_release!
-      release_title = "## #{Changelog.last_release} (#{current_date})"
-      content       = file_content.insert(1, release_title)
-                                  .join("\n")
+      merge! do
+        release_title = "\n## #{Changelog::Release.last_release} (#{current_date})\n"
 
-      write_file(content)
+        file_content.insert(1, release_title)
+      end
     end
 
     private
 
-    attr_reader :header, :unreleased, :rest, :entries, :file_content
+    attr_reader :header, :rest, :entries, :file_content
 
     def write_file(content)
       File.write(Changelog::PATH, content)
