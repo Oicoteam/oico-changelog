@@ -3,6 +3,7 @@ require 'strscan'
 require_relative 'changelog/version'
 require_relative 'changelog/constants'
 require_relative 'changelog/entry'
+require_relative 'changelog/release'
 
 module Oico
   class Changelog
@@ -10,37 +11,46 @@ module Oico
 
     class Error < StandardError; end
 
-    def initialize(content: File.read(Changelog::PATH), entries: Changelog.read_entries)
-      string      = StringScanner.new(content)
+    attr_reader :unreleased
 
-      @header     = string.scan_until(Changelog::FIRST_HEADER)
-      @unreleased = parse_release(string.scan_until(/\n(?=## )/m))
-      @rest       = string.rest.chomp
-      @entries    = entries
+    def initialize(content: File.read(Changelog::PATH), entries: Changelog.read_entries)
+      string        = StringScanner.new(content)
+
+      @header       = string.scan_until(Changelog::FIRST_HEADER)
+      @unreleased   = parse_release(string.scan_until(/\n(?=## )/m))
+      @rest         = string.rest.chomp
+      @entries      = entries
+      @file_content = [header, unreleased_content]
     end
 
     def merge!
-      File.write(Changelog::PATH, merge_content)
+      yield if block_given?
 
-      self
+      file_content << rest unless rest.empty?
+      file_content << EOF  unless file_content[-1]&.end_with?("\n")
+
+      content = file_content.join("\n").gsub(/[\n]{2,}/, "\n\n")
+
+      write_file(content)
     end
 
-    def merge_content
-      merged_content = [header, unreleased_content]
+    def add_release!
+      merge! do
+        release_title = "\n## #{Changelog::Release.last_release} (#{current_date})\n"
 
-      merged_content << rest unless rest.empty?
-      merged_content << EOF  unless merged_content[-1]&.end_with?("\n")
-
-      merged_content.join("\n").gsub(/[\n]{2,}/, "\n\n")
-    end
-
-    def delete_entries!
-      entries.each_key { |path| File.delete(path) }
+        file_content.insert(1, release_title)
+      end
     end
 
     private
 
-    attr_reader :header, :unreleased, :rest, :entries
+    attr_reader :header, :rest, :entries, :file_content
+
+    def write_file(content)
+      File.write(Changelog::PATH, content)
+
+      self
+    end
 
     def parse_release(unreleased_entries)
       return {} unless unreleased_entries
@@ -72,10 +82,14 @@ module Oico
     end
 
     def merge_entries(entry_map)
-      all       = unreleased.merge(entry_map) { |_k, v1, v2| v1.concat(v2) }
-      distinct  = Changelog::TYPE_TO_HEADER.values.to_h { |v| [v, nil] }
+      all      = unreleased.merge(entry_map) { |_k, v1, v2| v1.concat(v2) }
+      distinct = Changelog::TYPE_TO_HEADER.values.to_h { |v| [v, nil] }
 
       distinct.merge(all).compact
+    end
+
+    def current_date
+      Time.now.strftime("%d-%m-%Y")
     end
 
     class << self
@@ -85,6 +99,12 @@ module Oico
 
       def read_entries
         entry_paths.to_h { |path| [path, File.read(path)] }
+      end
+
+      def delete_entries!
+        entries = Changelog.read_entries
+
+        entries.each_key { |path| File.delete(path) }
       end
 
       def entry_paths

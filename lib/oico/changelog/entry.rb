@@ -1,19 +1,18 @@
 module Oico
   class Changelog
     class Entry
-      def initialize(type:, body: last_commit, ref_type: nil, ref_id: nil, user: github_user)
-        id, message = extract_id_and_message(body.lines)
+      def initialize(body: last_commit, user: last_commit_user, type: nil, ref_type: nil, ref_id: nil)
+        extracted_message, extracted_id, extracted_type = extract_id_and_message(body.lines)
 
-        @type     = type
-        @message  = message
-        @ref_type = ref_type || (id ? :pull : :issues)
-        @ref_id   = ref_id || id || 'NOT_FOUND'
+        @type     = type || extracted_type
+        @message  = extracted_message
+        @ref_type = ref_type || (extracted_id ? :pull : :issues)
+        @ref_id   = ref_id || extracted_id || 'NOT_FOUND'
         @user     = user
       end
 
       def write
         Dir.mkdir(Changelog::ENTRIES_PATH) unless Dir.exist?(Changelog::ENTRIES_PATH)
-
         File.write(path, content)
 
         path
@@ -22,7 +21,7 @@ module Oico
       def content
         period = '.' unless message.end_with?('.')
 
-        "* #{ref}: #{message}#{period} ([@#{user}][])\n"
+        "* #{ref}: #{message}#{period} #{user.include?(" ") ? "([#{user}])" : "([@#{user}])"}\n"
       end
 
       private
@@ -33,10 +32,11 @@ module Oico
       def extract_id_and_message(body)
         extract_commit_message(body)
 
-        id, message = /(?:.*)?#(\d+).?(.*)/.match(commit_title)&.captures || [nil, commit_title]
-        message     = commit_message unless commit_message.empty?
+        matches           = Changelog::MESSAGE_REGEX.match(commit_title)&.captures
+        message, id, type = matches || [commit_title, nil, 'feature']
+        message           = commit_message unless commit_message.empty?
 
-        [id, message]
+        [message, id, type]
       end
 
       def path
@@ -57,18 +57,12 @@ module Oico
               end
       end
 
-      def github_user
-        user = `git config --global credential.username`.chomp
-
-        if user.empty?
-          warn 'Set your username with `git config --global credential.username "myusernamehere"`'
-        end
-
-        user
-      end
-
       def ref
         "[##{ref_id}](#{Changelog::REF_URL}/#{ref_type}/#{ref_id})"
+      end
+
+      def last_commit_user
+        `git log -1 --pretty=format:'%an'`
       end
 
       def last_commit
