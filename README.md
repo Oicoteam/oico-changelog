@@ -13,7 +13,7 @@ This project is the oico changelog gem.
 
 `Oico::Changelog::Entry.new(type: TYPE, ref_type: REF_TYPE, ref_id: REF_ID).write`
 
-- TYPE: [:new, :fix, :change]
+- TYPE: [:feature, :fix, :change]
 - REF_TYPE: [:pull, :issue]
 - REF_ID (pull request id or issue id)
 
@@ -23,7 +23,7 @@ This project is the oico changelog gem.
 
 **To delete all entries:**
 
-`Oico::Changelog.new.delete_entries!`
+`Oico::Changelog.delete_entries!`
 
 **To merge a new release into CHANGELOG.md:**
 

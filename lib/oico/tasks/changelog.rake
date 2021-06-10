@@ -15,7 +15,7 @@ namespace :changelog do
   end
 
   desc 'Create a Changelog entry automatically'
-  task :auto, [:id] do |_task, args|
+  task :entry_auto, [:id] do |_task, args|
     ref_type = :pull if args[:id]
     path = Changelog::Entry.new(ref_id: args[:id], ref_type: ref_type).write
     cmd = "git add #{path}"

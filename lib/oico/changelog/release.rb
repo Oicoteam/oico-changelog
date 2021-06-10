@@ -24,22 +24,18 @@ module Oico
 
         def auto_detect
           changelog  = Changelog.new
+          header     = Changelog::TYPE_TO_HEADER
           unreleased = changelog.unreleased
 
           return if unreleased.empty?
 
           release_type = :patch
+          release_type = :minor if unreleased[header[:feature]]&.any?
+          release_type = :major if unreleased[header[:change]]&.any?
 
-          if unreleased[Changelog::TYPE_TO_HEADER[:change]]&.any?
-            release_type = :major
-          elsif unreleased[Changelog::TYPE_TO_HEADER[:feature]]&.any?
-            release_type = :minor
-          end
+          changelog.add_release!
 
-          # changelog.add_release!
-
-          # public_send(release_type)
-          release_type
+          public_send(release_type)
         end
       end
     end

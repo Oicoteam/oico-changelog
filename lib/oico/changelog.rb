@@ -29,8 +29,7 @@ module Oico
       file_content << rest unless rest.empty?
       file_content << EOF  unless file_content[-1]&.end_with?("\n")
 
-      content = file_content.join("\n")
-                            .gsub(/[\n]{2,}/, "\n\n")
+      content = file_content.join("\n").gsub(/[\n]{2,}/, "\n\n")
 
       write_file(content)
     end

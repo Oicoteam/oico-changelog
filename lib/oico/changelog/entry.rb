@@ -13,7 +13,6 @@ module Oico
 
       def write
         Dir.mkdir(Changelog::ENTRIES_PATH) unless Dir.exist?(Changelog::ENTRIES_PATH)
-
         File.write(path, content)
 
         path
