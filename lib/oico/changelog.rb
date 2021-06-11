@@ -14,10 +14,12 @@ module Oico
     attr_reader :unreleased
 
     def initialize(content: File.read(Changelog::PATH), entries: Changelog.read_entries)
-      string        = StringScanner.new(content)
+      string            = StringScanner.new(content)
+      header            = string.scan_until(Changelog::FIRST_HEADER)
+      current_unrelease = string.scan_until(/\n(?=## )/m) || string.scan_until(/\z/)
 
-      @header       = string.scan_until(Changelog::FIRST_HEADER)
-      @unreleased   = parse_release(string.scan_until(/\n(?=## )/m))
+      @header       = header
+      @unreleased   = parse_release(current_unrelease)
       @rest         = string.rest.chomp
       @entries      = entries
       @file_content = [header, unreleased_content]

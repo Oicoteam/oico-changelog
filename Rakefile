@@ -1,5 +1,7 @@
 require 'bundler'
 require 'bundler/gem_tasks'
+require 'rake'
+
 begin
   Bundler.setup(:default, :development)
 rescue Bundler::BundlerError => e
@@ -7,8 +9,5 @@ rescue Bundler::BundlerError => e
   warn 'Run `bundle install` to install missing gems'
   exit e.status_code
 end
-require 'rake'
-
-task release: 'changelog:check_clean'
 
 Dir['tasks/**/*.rake'].each { |t| load t }
