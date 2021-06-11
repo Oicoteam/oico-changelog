@@ -1,9 +1,9 @@
 require 'dotenv/load'
 require 'strscan'
-require_relative 'changelog/version'
-require_relative 'changelog/constants'
-require_relative 'changelog/entry'
-require_relative 'changelog/release'
+require 'oico/changelog/version'
+require 'oico/changelog/constants'
+require 'oico/changelog/entry'
+require 'oico/changelog/release'
 
 module Oico
   class Changelog

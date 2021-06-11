@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../lib/oico/changelog'
+require 'oico/changelog'
 
 namespace :changelog do
   %i[feature fix change].each do |type|
