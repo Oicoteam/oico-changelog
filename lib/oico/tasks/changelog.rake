@@ -26,6 +26,8 @@ namespace :changelog do
     raise 'No entries!' unless Oico::Changelog.pending?
 
     Oico::Changelog.new.merge!
+
+    puts 'Entries merged to CHANGELOG.md with success!'
   end
 
   desc 'Delete entries'
@@ -33,21 +35,30 @@ namespace :changelog do
     raise 'No entries!' unless Oico::Changelog.pending?
 
     Oico::Changelog.delete_entries!
+
+    puts 'Entries deleted with success!'
   end
 
   desc 'Create release tag'
   task :release, [:type] do |_task, args|
     Oico::Changelog::Release.public_send(args[:type])
+
+    puts 'Tag released with success!'
   end
 
   desc 'Create release tag automatically'
   task :release_auto do
     Oico::Changelog::Release.auto_detect
+
+    puts 'Tag released automatically with success!'
   end
 
   desc 'Check pending entries'
   task :check_clean do
-    next unless Oico::Changelog.pending?
+    unless Oico::Changelog.pending?
+      puts 'No pending changelog entries!'
+      next
+    end
 
     puts '*** Pending changelog entries!'
     puts 'Do `bundle exec rake changelog:merge`'

@@ -7,6 +7,8 @@ require 'oico/changelog/release'
 
 module Oico
   class Changelog
+    require 'oico/changelog/railtie' if defined?(Rails)
+
     include Oico::Changelog::Constants
 
     class Error < StandardError; end
