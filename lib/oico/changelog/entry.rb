@@ -32,9 +32,9 @@ module Oico
       def extract_id_and_message(body)
         extract_commit_message(body)
 
-        matches           = Changelog::MESSAGE_REGEX.match(commit_title)&.captures
-        message, id, type = matches || [commit_title, nil, 'feature']
-        message           = commit_message unless commit_message.empty?
+        matches  = Changelog::MESSAGE_REGEX.match(commit_title)&.captures
+        id, type = matches || [nil, 'feature']
+        message  = commit_message.empty? ? commit_title : commit_message
 
         [message, id, type]
       end
