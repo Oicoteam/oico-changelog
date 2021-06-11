@@ -1,43 +1,43 @@
 # frozen_string_literal: true
 
-autoload :Changelog, "#{__dir__}/changelog"
+require_relative '../lib/oico/changelog'
 
 namespace :changelog do
   %i[feature fix change].each do |type|
     desc "Create a Changelog entry (#{type})"
     task type, [:id] do |_task, args|
       ref_type = :pull if args[:id]
-      path = Changelog::Entry.new(type: type, ref_id: args[:id], ref_type: ref_type).write
-      cmd = "git add #{path}"
-      system cmd
-      puts "Entry '#{path}' created and added to git index"
+      path     = Oico::Changelog::Entry.new(type: type, ref_id: args[:id], ref_type: ref_type).write
+
+      puts "Entry '#{path}' created with success!"
     end
   end
 
   desc 'Create a Changelog entry automatically'
   task :entry_auto, [:id] do |_task, args|
     ref_type = :pull if args[:id]
-    path = Changelog::Entry.new(ref_id: args[:id], ref_type: ref_type).write
-    cmd = "git add #{path}"
-    system cmd
-    puts "Entry '#{path}' created and added to git index"
+    path     = Oico::Changelog::Entry.new(ref_id: args[:id], ref_type: ref_type).write
+
+    puts "Entry '#{path}' created with success!"
   end
 
   desc 'Merge entries'
   task :merge do
-    raise 'No entries!' unless Changelog.pending?
+    raise 'No entries!' unless Oico::Changelog.pending?
 
-    Changelog.new.merge!
+    Oico::Changelog.new.merge!
+
     cmd = "git commit -a -m 'Update Changelog'"
+
     puts cmd
     system cmd
   end
 
   desc 'Delete entries'
   task :delete do
-    raise 'No entries!' unless Changelog.pending?
+    raise 'No entries!' unless Oico::Changelog.pending?
 
-    Changelog.delete_entries!
+    Oico::Changelog.delete_entries!
     cmd = "git commit -a -m 'Update Changelog'"
     puts cmd
     system cmd
@@ -51,11 +51,16 @@ namespace :changelog do
   desc 'Create release tag automatically'
   task :release_auto do
     Oico::Changelog::Release.auto_detect
+
+    cmd = "git push origin main"
+
+    puts cmd
+    system cmd
   end
 
   desc 'Check pending entries'
   task :check_clean do
-    next unless Changelog.pending?
+    next unless Oico::Changelog.pending?
 
     puts '*** Pending changelog entries!'
     puts 'Do `bundle exec rake changelog:merge`'

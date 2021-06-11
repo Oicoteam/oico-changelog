@@ -1,6 +1,14 @@
-require "bundler/gem_tasks"
-require "rspec/core/rake_task"
+require 'bundler'
+require 'bundler/gem_tasks'
+begin
+  Bundler.setup(:default, :development)
+rescue Bundler::BundlerError => e
+  warn e.message
+  warn 'Run `bundle install` to install missing gems'
+  exit e.status_code
+end
+require 'rake'
 
-RSpec::Core::RakeTask.new(:spec)
+task release: 'changelog:check_clean'
 
-task :default => :spec
+Dir['tasks/**/*.rake'].each { |t| load t }

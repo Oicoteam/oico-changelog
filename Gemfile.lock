@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    oico-changelog (0.1.0)
+    oico-changelog (1.0.0)
 
 GEM
   remote: https://rubygems.org/
