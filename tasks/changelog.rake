@@ -26,11 +26,6 @@ namespace :changelog do
     raise 'No entries!' unless Oico::Changelog.pending?
 
     Oico::Changelog.new.merge!
-
-    cmd = "git commit -a -m 'Update Changelog'"
-
-    puts cmd
-    system cmd
   end
 
   desc 'Delete entries'
@@ -38,9 +33,6 @@ namespace :changelog do
     raise 'No entries!' unless Oico::Changelog.pending?
 
     Oico::Changelog.delete_entries!
-    cmd = "git commit -a -m 'Update Changelog'"
-    puts cmd
-    system cmd
   end
 
   desc 'Create release tag'
@@ -51,11 +43,6 @@ namespace :changelog do
   desc 'Create release tag automatically'
   task :release_auto do
     Oico::Changelog::Release.auto_detect
-
-    cmd = "git push origin main"
-
-    puts cmd
-    system cmd
   end
 
   desc 'Check pending entries'
