@@ -39,7 +39,7 @@ pushd "$(dirname $0)/../"
 echo "Fetch tags"
 git fetch --all --tags
 
-version=$(git tag)
+version=$(git describe --tags --abbrev=0)
 version=${version:1} # Remove the v in the tag v0.37.10 for example
 
 echo "Current version: $version"

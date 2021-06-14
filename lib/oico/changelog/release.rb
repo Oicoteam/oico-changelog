@@ -6,15 +6,15 @@ module Oico
 
       class << self
         def major
-          `./bin/update_tags -M`
+          `"#{__dir__}/../../../bin/update_tags -M"`
         end
 
         def minor
-          `./bin/update_tags -m`
+          `"#{__dir__}/../../../bin/update_tags -m"`
         end
 
         def patch
-          `./bin/update_tags -p`
+          `"#{__dir__}/../../../bin/update_tags -p"`
         end
 
         def last_release
