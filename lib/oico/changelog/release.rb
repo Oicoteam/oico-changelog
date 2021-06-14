@@ -6,20 +6,20 @@ module Oico
 
       class << self
         def major
-          `"#{__dir__}/../../../bin/update_tags -M"`
+          `"#{Changelog.bin}/update_tags"`
         end
 
         def minor
-          `"#{__dir__}/../../../bin/update_tags -m"`
+          `"#{Changelog.bin}/update_tags"`
         end
 
         def patch
-          `"#{__dir__}/../../../bin/update_tags -p"`
+          `"#{Changelog.bin}/update_tags"`
         end
 
         def last_release
           `git fetch --all --tags`
-          `git tag`.chomp
+          `git describe --abbrev=0 --tags`.chomp
         end
 
         def auto_detect

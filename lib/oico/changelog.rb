@@ -114,6 +114,14 @@ module Oico
       def entry_paths
         Dir["#{Changelog::ENTRIES_PATH}*"]
       end
+
+      def root
+        Pathname.new(File.expand_path('../../', __dir__))
+      end
+
+      def bin
+        File.join root, 'bin'
+      end
     end
   end
 end
