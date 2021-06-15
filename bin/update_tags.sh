@@ -7,6 +7,7 @@
 # 4) Push the tag
 
 # Parse command line options.
+
 while getopts ":Mmpd" Option
 do
   case $Option in
@@ -19,6 +20,7 @@ done
 shift $(($OPTIND - 1))
 
 # Display usage
+
 if [ -z $major ] && [ -z $minor ] && [ -z $patch ];
 then
   echo "usage: $(basename $0) [Mmp] [message]"
@@ -32,15 +34,13 @@ then
   exit 1
 fi
 
-# Force to the root of the project
-pushd "$(dirname $0)/../"
-
 # 1) Fetch the current release version
+
 echo "Fetch tags"
 git fetch --all --tags
 
 version=$(git describe --tags --abbrev=0)
-version=${version:1} # Remove the v in the tag v0.37.10 for example
+version=$(echo ${version} | sed 's/^v//')  # Remove the v in the tag v0.37.10 for example
 
 echo "Current version: $version"
 
@@ -77,16 +77,17 @@ else
 fi
 
 # If a command fails, exit the script
+
 set -e
 
 # 3) Add git tag
+
 echo "Add git tag v$next_version with message: $msg"
 git tag "v$next_version"
 
 # 4) Push the new tag
+
 echo "Push the tag"
 git push --tags
 
 echo -e "Release done: $next_version"
-
-popd
