@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Script to simplify the release flow.
 # 1) Fetch the current release version
