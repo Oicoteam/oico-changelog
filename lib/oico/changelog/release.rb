@@ -37,7 +37,7 @@ module Oico
           p 'Fetch tags'
 
           `git fetch --all --tags`
-          `git describe --abbrev=0 --tags`.chomp
+          `git describe --tags \`git rev-list --tags --max-count=1\``.chomp.strip
         end
 
         def auto_detect
