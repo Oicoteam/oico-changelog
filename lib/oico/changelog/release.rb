@@ -1,23 +1,41 @@
 module Oico
   class Changelog
     class Release
-      FEATURE_REGEX = /changelog\/feature/.freeze
-      CHANGE_REGEX  = /changelog\/change/.freeze
+      FEATURE_REGEX   = /changelog\/feature/.freeze
+      CHANGE_REGEX    = /changelog\/change/.freeze
+      DEFAULT_VERSION = 'v1.0.0'
 
       class << self
         def major
-          system("sh #{Changelog.bin}/update_tags.sh -M")
+          version = current_version_segments
+
+          version[0] += 1
+          version[1]  = 0
+          version[2]  = 0
+
+          push_next_tag(version.join('.'))
         end
 
         def minor
-          system("sh #{Changelog.bin}/update_tags.sh -m")
+          version = current_version_segments
+
+          version[1] += 1
+          version[2]  = 0
+
+          push_next_tag(version.join('.'))
         end
 
         def patch
-          system("sh #{Changelog.bin}/update_tags.sh -p")
+          version = current_version_segments
+
+          version[2] += 1
+
+          push_next_tag(version.join('.'))
         end
 
         def last_release
+          p 'Fetch tags'
+
           `git fetch --all --tags`
           `git describe --abbrev=0 --tags`.chomp
         end
@@ -36,6 +54,27 @@ module Oico
           changelog.add_release!
 
           public_send(release_type)
+        end
+
+        private
+
+        def current_version_segments
+          current_version = last_release
+          current_version = DEFAULT_VERSION if current_version.nil? || current_version.empty?
+
+          p "Current version: #{current_version}"
+
+          current_version.gsub(/v|\./, '').chars.map(&:to_i)
+        end
+
+        def push_next_tag(next_tag)
+          p "Add git tag v#{next_tag}"
+
+          if system("git tag \"v#{next_tag}\"") && system('git push --tags')
+            p 'Release done successfully!'
+          else
+            p 'Unknown error!'
+          end
         end
       end
     end
