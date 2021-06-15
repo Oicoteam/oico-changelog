@@ -13,5 +13,5 @@ module Oico::Changelog::Constants
   REF_URL = ENV["REF_URL"]
   SIGNATURE = Regexp.new(format(Regexp.escape('[@%<user>s][]'), user: '([\w-]+)'))
   TYPE_REGEXP = /#{Regexp.escape(ENTRIES_PATH)}([a-z]+)_/.freeze
-  TYPE_TO_HEADER = { change: 'Changes', feature: 'New features', fix: 'Bug fixes' }.freeze
+  TYPE_TO_HEADER = { change: 'Changes', feature: 'New features', fix: 'Bug fixes', dependabot: 'Dependencies' }.freeze
 end

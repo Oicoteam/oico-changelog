@@ -34,7 +34,7 @@ module Oico
         end
 
         def last_release
-          p 'Fetch tags'
+          puts 'Fetch tags'
 
           `git fetch --all --tags`
           `git describe --tags \`git rev-list --tags --max-count=1\``.chomp.strip
@@ -62,20 +62,21 @@ module Oico
           current_version = last_release
           current_version = DEFAULT_VERSION if current_version.nil? || current_version.empty?
 
-          p "Current version: #{current_version}"
+          puts "Current version: #{current_version}"
 
           current_version.gsub(/v|\./, '').chars.map(&:to_i)
         end
 
         def push_next_tag(next_tag)
-          p "Add git tag v#{next_tag}"
+          puts "Add git tag v#{next_tag}"
 
           if system("git tag \"v#{next_tag}\"") && system('git push --tags')
-            p 'Release done successfully!'
+            puts 'Release done successfully!'
           else
-            p 'Unknown error!'
+            puts 'Unknown error!'
           end
         end
+
       end
     end
   end
