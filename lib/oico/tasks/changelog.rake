@@ -23,7 +23,10 @@ namespace :changelog do
 
   desc 'Merge entries'
   task :merge do
-    raise 'No entries!' unless Oico::Changelog.pending?
+    unless Oico::Changelog.pending?
+      puts 'No pending changelog entries!'
+      next
+    end
 
     Oico::Changelog.new.merge!
 
@@ -32,7 +35,10 @@ namespace :changelog do
 
   desc 'Delete entries'
   task :delete do
-    raise 'No entries!' unless Oico::Changelog.pending?
+    unless Oico::Changelog.pending?
+      puts 'No pending changelog entries!'
+      next
+    end
 
     Oico::Changelog.delete_entries!
 
