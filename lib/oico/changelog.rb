@@ -120,7 +120,7 @@ module Oico
       end
 
       def bin
-        File.join root, 'bin'
+        File.join(root, 'bin')
       end
     end
   end

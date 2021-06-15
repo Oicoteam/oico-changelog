@@ -6,15 +6,15 @@ module Oico
 
       class << self
         def major
-          `"#{Changelog.bin}/update_tags -M"`
+          system("#{Changelog.bin}/update_tags -M")
         end
 
         def minor
-          `"#{Changelog.bin}/update_tags -m"`
+          system("#{Changelog.bin}/update_tags -m")
         end
 
         def patch
-          `"#{Changelog.bin}/update_tags -p"`
+          system("#{Changelog.bin}/update_tags -p")
         end
 
         def last_release
