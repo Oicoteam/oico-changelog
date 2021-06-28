@@ -51,8 +51,6 @@ module Oico
           release_type = :minor if unreleased[header[:feature]]&.any?
           release_type = :major if unreleased[header[:change]]&.any?
 
-          changelog.add_release!
-
           public_send(release_type)
         end
 
@@ -68,15 +66,18 @@ module Oico
         end
 
         def push_next_tag(next_tag)
-          puts "Add git tag v#{next_tag}"
+          version = "v#{next_tag}"
 
-          if system("git tag \"v#{next_tag}\"") && system('git push --tags')
+          puts "Add git tag #{version}"
+
+          Changelog.new.add_release!(version)
+
+          if system("git tag \"#{version}\" && git push --tags")
             puts 'Release done successfully!'
           else
             puts 'Unknown error!'
           end
         end
-
       end
     end
   end

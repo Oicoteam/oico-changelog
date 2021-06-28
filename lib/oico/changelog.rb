@@ -38,9 +38,9 @@ module Oico
       write_file(content)
     end
 
-    def add_release!
+    def add_release!(version = Changelog::Release.last_release)
       merge! do
-        release_title = "\n## #{Changelog::Release.last_release} (#{current_date})\n"
+        release_title = "\n## #{version} (#{current_date})\n"
 
         file_content.insert(1, release_title)
       end
