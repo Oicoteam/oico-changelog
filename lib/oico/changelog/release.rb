@@ -62,7 +62,7 @@ module Oico
 
           puts "Current version: #{current_version}"
 
-          current_version.gsub(/v|\./, '').chars.map(&:to_i)
+          current_version.gsub(/v/, '').split('.').map(&:to_i)
         end
 
         def push_next_tag(next_tag)
